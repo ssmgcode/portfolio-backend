@@ -50,10 +50,10 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	message := gomail.NewMessage()
 	message.SetHeaders(map[string][]string{
 		"From":    {fromEmail},
-		"To":      {form.Email},
+		"To":      {fromEmail},
 		"Subject": {form.Subject},
 	})
-	message.SetBody("text/plain", form.Message)
+	message.SetBody("text/plain", "Name: "+form.Name+"\nEmail: "+form.Email+"\n"+form.Message)
 
 	// Settings for SMTP server.
 	dialer := gomail.NewDialer("smtp.gmail.com", 587, fromEmail, fromPassword)
