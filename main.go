@@ -44,7 +44,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	fromPassword := os.Getenv("FROM_PASSWORD")
 	form, err := parseBodyRequestToFormStruct(r)
 	if err != nil {
-		http.Error(rw, err.Error(), 400)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
 	message := gomail.NewMessage()
@@ -63,9 +63,10 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err = dialer.DialAndSend(message); err != nil {
-		http.Error(rw, err.Error(), 500)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		panic(err)
 	}
+	http.Error(rw, "Email sent successfully", http.StatusOK)
 }
 
 func main() {
