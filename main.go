@@ -70,7 +70,13 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
 	loadEnvVariables()
-	http.HandleFunc("/", sendEmailHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
+	http.HandleFunc("/send-mail", sendEmailHandler)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
