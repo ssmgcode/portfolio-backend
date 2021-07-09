@@ -1,9 +1,11 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"gopkg.in/gomail.v2"
 	"log"
 	"net/http"
 )
@@ -33,7 +35,25 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), 400)
 		return
 	}
-	fmt.Println(form)
+	message := gomail.NewMessage()
+	message.SetHeaders(map[string][]string{
+		"From":    {""},
+		"To":      {form.Email},
+		"Subject": {form.Subject},
+	})
+	message.SetBody("text/plain", form.Message)
+
+	// Settings for SMTP server.
+	dialer := gomail.NewDialer("smtp.gmail.com", 587, "", "")
+
+	// This is only needed when SSL/TLS certificate is not valid in server.
+	// In production this should be set to false.
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	if err = dialer.DialAndSend(message); err != nil {
+		fmt.Println(err)
+		panic(err)
+	}
 }
 
 func main() {
