@@ -4,10 +4,10 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"fmt"
-	"gopkg.in/gomail.v2"
 	"log"
 	"net/http"
+
+	"gopkg.in/gomail.v2"
 )
 
 type Form struct {
@@ -51,7 +51,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err = dialer.DialAndSend(message); err != nil {
-		fmt.Println(err)
+		http.Error(rw, err.Error(), 500)
 		panic(err)
 	}
 }
