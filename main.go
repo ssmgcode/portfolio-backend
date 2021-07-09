@@ -6,7 +6,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 
+	"github.com/joho/godotenv"
 	"gopkg.in/gomail.v2"
 )
 
@@ -15,6 +17,14 @@ type Form struct {
 	Email   string
 	Subject string
 	Message string
+}
+
+// Use GoDotEnv package to load/read the .env file.
+func loadEnvVariables() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env files\n")
+	}
 }
 
 func parseBodyRequestToFormStruct(r *http.Request) (*Form, error) {
@@ -30,6 +40,8 @@ func parseBodyRequestToFormStruct(r *http.Request) (*Form, error) {
 }
 
 func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
+	fromEmail := os.Getenv("FROM_MAIL")
+	fromPassword := os.Getenv("FROM_PASSWORD")
 	form, err := parseBodyRequestToFormStruct(r)
 	if err != nil {
 		http.Error(rw, err.Error(), 400)
@@ -37,14 +49,14 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	}
 	message := gomail.NewMessage()
 	message.SetHeaders(map[string][]string{
-		"From":    {""},
+		"From":    {fromEmail},
 		"To":      {form.Email},
 		"Subject": {form.Subject},
 	})
 	message.SetBody("text/plain", form.Message)
 
 	// Settings for SMTP server.
-	dialer := gomail.NewDialer("smtp.gmail.com", 587, "", "")
+	dialer := gomail.NewDialer("smtp.gmail.com", 587, fromEmail, fromPassword)
 
 	// This is only needed when SSL/TLS certificate is not valid in server.
 	// In production this should be set to false.
@@ -57,6 +69,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	loadEnvVariables()
 	http.HandleFunc("/", sendEmailHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
