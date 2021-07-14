@@ -70,8 +70,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-
-	loadEnvVariables()
+	// loadEnvVariables()
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
