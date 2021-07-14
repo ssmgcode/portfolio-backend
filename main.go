@@ -60,7 +60,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 
 	// This is only needed when SSL/TLS certificate is not valid in server.
 	// In production this should be set to false.
-	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: false}
 
 	if err = dialer.DialAndSend(message); err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
