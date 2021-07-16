@@ -50,7 +50,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	from := mail.Address{Name: "SSMG Code", Address: myEmail}
+	from := mail.Address{Name: form.Name, Address: form.Email}
 	to := mail.Address{Name: "SSMG Code", Address: myEmail}
 
 	headers := map[string]string{
