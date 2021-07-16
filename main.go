@@ -1,15 +1,17 @@
 package main
 
 import (
-	// "crypto/tls"
+	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"net/mail"
+	"net/smtp"
 	"os"
-
-	"github.com/joho/godotenv"
-	"gopkg.in/gomail.v2"
 )
 
 type Form struct {
@@ -19,11 +21,10 @@ type Form struct {
 	Message string
 }
 
-// Use GoDotEnv package to load/read the .env file.
-func loadEnvVariables() {
-	err := godotenv.Load()
+func sendInternalServerError(err error, rw http.ResponseWriter) {
 	if err != nil {
-		log.Fatal("Error loading .env files\n")
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		log.Panic(err)
 	}
 }
 
@@ -34,43 +35,84 @@ func parseBodyRequestToFormStruct(r *http.Request) (*Form, error) {
 	}
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		return nil, errors.New("Please send name, email, subject and message.")
+		return nil, errors.New("Please send name, mail, subject and message.")
 	}
 	return form, nil
 }
 
 func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
-	fromEmail := os.Getenv("FROM_MAIL")
-	fromPassword := os.Getenv("FROM_PASSWORD")
+	myEmail := os.Getenv("FROM_MAIL")
+	myPassword := os.Getenv("FROM_PASSWORD")
+
 	form, err := parseBodyRequestToFormStruct(r)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusBadRequest)
 		return
 	}
-	message := gomail.NewMessage()
-	message.SetHeaders(map[string][]string{
-		"From":    {fromEmail},
-		"To":      {fromEmail},
-		"Subject": {form.Subject},
-	})
-	message.SetBody("text/plain", "Name: "+form.Name+"\nEmail: "+form.Email+"\n"+form.Message)
 
-	// Settings for SMTP server.
-	dialer := gomail.NewDialer("smtp.gmail.com", 587, fromEmail, fromPassword)
+	from := mail.Address{Name: form.Name, Address: form.Email}
+	to := mail.Address{Name: "SSMG Code", Address: myEmail}
 
-	// This is only needed when SSL/TLS certificate is not valid in server.
-	// In production this should be set to false.
-	// dialer.TLSConfig = &tls.Config{InsecureSkipVerify: false}
-
-	if err = dialer.DialAndSend(message); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-		panic(err)
+	headers := map[string]string{
+		"From":         from.String(),
+		"To":           to.String(),
+		"Subject":      form.Subject,
+		"Content-Type": `text/html; charset="UTF-8"`,
 	}
+
+	var message string
+	for key, value := range headers {
+		message += fmt.Sprintf("%s: %s\r\n", key, value)
+	}
+
+	t, err := template.ParseFiles("template.html")
+	sendInternalServerError(err, rw)
+	buf := new(bytes.Buffer)
+	err = t.Execute(buf, form)
+	sendInternalServerError(err, rw)
+	message += buf.String()
+
+	servername := "smtp.gmail.com:465"
+	host := "smtp.gmail.com"
+	auth := smtp.PlainAuth("", myEmail, myPassword, host)
+
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         host,
+	}
+
+	conn, err := tls.Dial("tcp", servername, tlsConfig)
+	sendInternalServerError(err, rw)
+
+	client, err := smtp.NewClient(conn, host)
+	sendInternalServerError(err, rw)
+
+	err = client.Auth(auth)
+	sendInternalServerError(err, rw)
+
+	err = client.Mail(from.Address)
+	sendInternalServerError(err, rw)
+
+	err = client.Rcpt(to.Address)
+	sendInternalServerError(err, rw)
+
+	w, err := client.Data()
+	sendInternalServerError(err, rw)
+
+	_, err = w.Write([]byte(message))
+	sendInternalServerError(err, rw)
+
+	err = w.Close()
+	sendInternalServerError(err, rw)
+
+	client.Quit()
+
 	http.Error(rw, "Email sent successfully", http.StatusOK)
+	fmt.Println("Email sent successfully")
 }
 
 func main() {
-	// loadEnvVariables()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")

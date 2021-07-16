@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Propuesta de trabajo</title>
+    <link
+      rel="stylesheet"
+      href="https://necolas.github.io/normalize.css/8.0.1/normalize.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: #f0f2f5;
+      }
+
+      body {
+        background: #ffffff;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        border-radius: 7px;
+        font-family: Inter;
+        width: 90%;
+        max-width: 700px;
+        margin: 20px auto;
+        padding: 25px;
+        padding-top: 10px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .key {
+        font-weight: bold;
+        margin-bottom: 7px;
+      }
+
+      .value {
+        border-radius: 5px;
+        padding: 7px;
+        margin: 0;
+        background: #e9ecf5;
+        box-shadow: inset rgba(0, 0, 0, 0.11) 0 0 0 1px;
+      }
+
+      .action-container {
+        margin-top: 25px;
+      }
+
+      .button {
+        width: 100%;
+        display: inline-block;
+        text-align: center;
+        padding: 10px 16px;
+        border-radius: 5px;
+        outline: none;
+        border: none;
+        background: #0466c8;
+        color: #ffffff;
+        font-weight: bold;
+        transform: scale(1);
+        box-shadow: inset rgba(0, 0, 0, 0.11) 0 0 0 1px;
+        font-size: 1em;
+        user-select: none;
+        text-decoration: none;
+      }
+
+      .button:hover {
+        background: #0353a4;
+      }
+
+      .button:active {
+        transform: scale(0.99);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>New job proposal</h1>
+    <p class="key">Name:</p>
+    <p class="value">{{.Name}}</p>
+    <p class="key">Email:</p>
+    <p class="value">{{.Email}}</p>
+    <p class="key">Subject:</p>
+    <p class="value">{{.Subject}}</p>
+    <p class="key">Message:</p>
+    <p class="value">{{.Message}}</p>
+    <div class="action-container">
+      <a
+        class="button"
+        href="mailto:{{.Email}}?subject=Reply to: {{.Subject}}&body=Answering to:%0d%0aSubject: {{.Subject}}%0d%0aMessage: {{.Message}}%0d%0a%0d%0a------%0d%0a%0d%0a%0d%0a"
+        >Contact</a
+      >
+    </div>
+  </body>
+</html>
