@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Propuesta de trabajo</title>
+    <link
+      rel="stylesheet"
+      href="https://necolas.github.io/normalize.css/8.0.1/normalize.css"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        background: #ffffff;
+      }
+
+      body {
+        background: rgba(248, 249, 250, 1);
+        background: green;
+        border-radius: 7px;
+        font-family: Inter;
+        width: 90%;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 25px;
+        padding-top: 10px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .key {
+        font-weight: bold;
+        margin-bottom: 7px;
+      }
+
+      .value {
+        border-radius: 5px;
+        border: 1px solid #f0f2f5;
+        padding: 7px;
+        margin: 0;
+        background: #e9ecf5;
+      }
+
+      .action-container {
+        margin-top: 25px;
+      }
+
+      button {
+        width: 100%;
+        padding: 8px 16px;
+        border-radius: 5px;
+        outline: none;
+        border: none;
+        background: #5f7dfc;
+        color: #ffffff;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>New job proposal</h1>
+    <p class="key">Name:</p>
+    <p class="value">{{.Name}}</p>
+    <p class="key">Email:</p>
+    <p class="value">{{.Email}}</p>
+    <p class="key">Subject:</p>
+    <p class="value">{{.Subject}}</p>
+    <p class="key">Message:</p>
+    <p class="value">{{.Message}}</p>
+    <div class="action-container"><button>Contact</button></div>
+  </body>
+</html>
