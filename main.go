@@ -75,7 +75,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	host := "smtp.gmail.com"
 	auth := smtp.PlainAuth("", myEmail, myPassword, host)
 
-	err = smtp.SendMail(host+":465", auth, myEmail, []string{to.Address}, []byte(message))
+	err = smtp.SendMail(host+":587", auth, myEmail, []string{to.Address}, []byte(message))
 	sendInternalServerError(err, rw)
 
 	http.Error(rw, "Email sent successfully", http.StatusOK)
