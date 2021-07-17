@@ -63,13 +63,14 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	for key, value := range headers {
 		message += fmt.Sprintf("%s: %s\r\n", key, value)
 	}
+	message += "\r\n"
 
 	t, err := template.ParseFiles("template.html")
 	sendInternalServerError(err, rw)
 	buf := new(bytes.Buffer)
 	err = t.Execute(buf, form)
 	sendInternalServerError(err, rw)
-	message += buf.String()
+	message += buf.String() + "\r\n"
 
 	host := "smtp.gmail.com"
 	auth := smtp.PlainAuth("", myEmail, myPassword, host)
