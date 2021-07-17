@@ -77,7 +77,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	auth := smtp.PlainAuth("", myEmail, myPassword, host)
 
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: false,
 		ServerName:         host,
 	}
 
