@@ -72,7 +72,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	sendInternalServerError(err, rw)
 	message += buf.String()
 
-	servername := "smtp.gmail.com:587"
+	servername := "smtp.gmail.com:465"
 	host := "smtp.gmail.com"
 	auth := smtp.PlainAuth("", myEmail, myPassword, host)
 
