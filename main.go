@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -72,47 +71,17 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 	sendInternalServerError(err, rw)
 	message += buf.String()
 
-	servername := "smtp.gmail.com:465"
 	host := "smtp.gmail.com"
 	auth := smtp.PlainAuth("", myEmail, myPassword, host)
 
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		ServerName:         host,
-	}
-
-	conn, err := tls.Dial("tcp", servername, tlsConfig)
+	smtp.SendMail(host+":465", auth, myEmail, []string{to.Address}, []byte(message))
 	sendInternalServerError(err, rw)
-
-	client, err := smtp.NewClient(conn, host)
-	sendInternalServerError(err, rw)
-
-	err = client.Auth(auth)
-	sendInternalServerError(err, rw)
-
-	err = client.Mail(from.Address)
-	sendInternalServerError(err, rw)
-
-	err = client.Rcpt(to.Address)
-	sendInternalServerError(err, rw)
-
-	w, err := client.Data()
-	sendInternalServerError(err, rw)
-
-	_, err = w.Write([]byte(message))
-	sendInternalServerError(err, rw)
-
-	err = w.Close()
-	sendInternalServerError(err, rw)
-
-	client.Quit()
 
 	http.Error(rw, "Email sent successfully", http.StatusOK)
 	fmt.Println("Email sent successfully")
 }
 
 func main() {
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
