@@ -1,16 +1,15 @@
 package main
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"html/template"
+	"github.com/mailgun/mailgun-go/v3"
 	"log"
 	"net/http"
-	"net/mail"
-	"net/smtp"
 	"os"
+	"time"
 )
 
 type Form struct {
@@ -40,8 +39,8 @@ func parseBodyRequestToFormStruct(r *http.Request) (*Form, error) {
 }
 
 func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
-	myEmail := os.Getenv("FROM_MAIL")
-	myPassword := os.Getenv("FROM_PASSWORD")
+	mailgunDomain := os.Getenv("MAILGUN_DOMAIN")
+	mailgunApiKey := os.Getenv("MAILGUN_API_KEY")
 
 	form, err := parseBodyRequestToFormStruct(r)
 	if err != nil {
@@ -49,33 +48,15 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	from := mail.Address{Name: form.Name, Address: form.Email}
-	to := mail.Address{Name: "SSMG Code", Address: myEmail}
+	messageText := "New job proposal:\n\n" + form.Message + "\n\nContact sender: " + form.Email
+	messageSender := form.Name + " " + "<" + form.Email + ">"
+	mg := mailgun.NewMailgun(mailgunDomain, mailgunApiKey)
+	message := mg.NewMessage(messageSender, form.Subject, messageText, "SSMG Code <ssmg.sg@gmail.com>")
 
-	headers := map[string]string{
-		"From":         from.String(),
-		"To":           to.String(),
-		"Subject":      form.Subject,
-		"Content-Type": `text/html; charset="UTF-8"`,
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+	defer cancel()
 
-	var message string
-	for key, value := range headers {
-		message += fmt.Sprintf("%s: %s\r\n", key, value)
-	}
-	message += "\r\n"
-
-	t, err := template.ParseFiles("template.html")
-	sendInternalServerError(err, rw)
-	buf := new(bytes.Buffer)
-	err = t.Execute(buf, form)
-	sendInternalServerError(err, rw)
-	message += buf.String() + "\r\n"
-
-	host := "smtp.gmail.com"
-	auth := smtp.PlainAuth("", myEmail, myPassword, host)
-
-	err = smtp.SendMail(host+":587", auth, myEmail, []string{to.Address}, []byte(message))
+	_, _, err = mg.Send(ctx, message)
 	sendInternalServerError(err, rw)
 
 	http.Error(rw, "Email sent successfully", http.StatusOK)
