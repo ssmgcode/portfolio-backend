@@ -50,7 +50,7 @@ func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
 
 	messageSender := form.Name + " " + "<" + form.Email + ">"
 	mg := mailgun.NewMailgun(mailgunDomain, mailgunApiKey)
-	message := mg.NewMessage(messageSender, form.Subject, form.Message, "SSMG Code <ssmg.sg@gmail.com>")
+	message := mg.NewMessage(messageSender, form.Subject, form.Message+"\n\nContacted from SSMG Code portfolio", "SSMG Code <ssmg.sg@gmail.com>")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
 	defer cancel()
