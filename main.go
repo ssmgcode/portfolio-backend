@@ -39,6 +39,11 @@ func parseBodyRequestToFormStruct(r *http.Request) (*Form, error) {
 }
 
 func sendEmailHandler(rw http.ResponseWriter, r *http.Request) {
+	header := rw.Header()
+	header.Add("Access-Control-Allow-Origin", "*")
+	header.Add("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With")
+	rw.WriteHeader(http.StatusOK)
+
 	mailgunDomain := os.Getenv("MAILGUN_DOMAIN")
 	mailgunApiKey := os.Getenv("MAILGUN_API_KEY")
 
